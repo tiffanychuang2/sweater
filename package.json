@@ -1,0 +1,22 @@
+{
+    "name": "sweater-cli",
+    "version": "1.0.0",
+    "description": "",
+    "main": "bin/index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "Tiffany Chuang",
+    "license": "",
+    "bin": {
+        "hello": "./bin/index.js"
+    },
+    "dependencies": {
+        "axios": "^0.21.1",
+        "node-fetch": "^2.6.1",
+        "prompt": "^1.1.0",
+        "xmlhttprequest": "^1.7.0",
+        "yargs": "^16.2.0"
+    }
+}
