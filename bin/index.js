@@ -7,26 +7,32 @@ var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const yaml = require('js-yaml');
 var fs = require('file-system');
 
-
 prompt.start();
+
+// Prompt user for city and state.  I used Postman to test the endpoint, and found that it was not case sensitive.  
+// For future tasks I could add do a case check and/or capitalize the first letter of the city and state and possibly add logic to allow for state abbreviations, rather than just full state names.
 
 prompt.get(['city', 'state'], function (err, result) {
     if (err) { return onErr(err); }
     
-    console.log('What city are you in?');
+    // console.log('What city are you in?');
     var city = result.city.trim();
-    console.log('What state?');
+    // console.log('What state? Please use full state name.');
     var state = result.state.trim();
     console.log(' Weather for: ' + city + ', ' + state);
     
     var apiKey = '05616663b88e9870bd3f8e6ae9d3849a';
     var endpoint = ('http://api.openweathermap.org/data/2.5/forecast?q=' + city + ',' + state + '&units=imperial&&appid=' + apiKey);
+    
+    // GET call to OpenWeather API
     var request = new XMLHttpRequest();
     request.open('GET', endpoint, false);
     request.responseTApptype = 'json';
     request.send();
     if(request.readyState == 4) {
         var response = JSON.parse(request.responseText);
+        
+        // Build response body - opted to just return the first result, but this could be put in a loop if I wanted to iterate through all results.
         var weather = {
             "date": response.list[0].dt_txt,
             "city name": response.city.name,
@@ -41,25 +47,33 @@ prompt.get(['city', 'state'], function (err, result) {
         }
         console.log(weather);
         
+        // Read .config file
         const recommendations = yaml.load(fs.readFileSync('recommendations.config'));
 
+        // Arrays for valid recommendations, and an additional array to see that all recommendations were considered.
         var validRecommendations = [];
         var dontWearList = [];
 
+        // For each recommendation, if the forecasted weather falls between the minimum and maximum temp
         for(var i=0; i<=recommendations.available_recommendations.length-1; i++) {   
             if((weather.temp >= recommendations.available_recommendations[i].min_temp) && (weather.temp <= recommendations.available_recommendations[i].max_temp)) {
-                if(weather.weather == 'Rain' && ecommendations.available_recommendations[i].waterproof == 'true') {
-                validRecommendations.push(recommendations.available_recommendations[i].name);
+                // And the forecast is rain or snow and the clothing item is waterproof 
+                if((weather.weather == 'Rain' || weather.weather == 'Snow') && recommendations.available_recommendations[i].waterproof == 'true') {
+                    //Add the recommended item name to the validRecommendations array.
+                    validRecommendations.push(recommendations.available_recommendations[i].name);
                 }
             } else {
+                // Otherwise, add the item name to the dontWearList
                 dontWearList.push(recommendations.available_recommendations[i].name);
             }
         }
 
+        //If the validRecommendations array is empty, return a message.
         if(validRecommendations.length == 0) {
             validRecommendations.push('You need new attire.');
         }
 
+        //Output for recommended attire
         console.log("Recommended attire: " + validRecommendations + "\nNot recommended attire: " + dontWearList);
     }
 });
