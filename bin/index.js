@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-console.log( "Hello!" );
+console.log( "Hello!  Please provide a city name and full state name for weather forecast and attire recommendations." );
 
 const prompt = require('prompt');
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
@@ -10,14 +10,14 @@ var fs = require('file-system');
 prompt.start();
 
 // Prompt user for city and state.  I used Postman to test the endpoint, and found that it was not case sensitive.  
-// For future tasks I could add do a case check and/or capitalize the first letter of the city and state and possibly add logic to allow for state abbreviations, rather than just full state names.
+// For future tasks I would start with TDD, and for user input, I would add a case check and/or capitalize the first letter of the city and state and possibly add logic to allow for state abbreviations, rather than just full state names.
 
 prompt.get(['city', 'state'], function (err, result) {
-    if (err) { return onErr(err); }
+    if (err) { 
+        return onErr(err); 
+    }
     
-    // console.log('What city are you in?');
     var city = result.city.trim();
-    // console.log('What state? Please use full state name.');
     var state = result.state.trim();
     console.log(' Weather for: ' + city + ', ' + state);
     
@@ -29,10 +29,11 @@ prompt.get(['city', 'state'], function (err, result) {
     request.open('GET', endpoint, false);
     request.responseTApptype = 'json';
     request.send();
+
     if(request.readyState == 4) {
         var response = JSON.parse(request.responseText);
         
-        // Build response body - opted to hardcode '0' to just return the first result, but this could be looped if I wanted to iterate through all results.
+        // Build response body - opted to hardcode '0' to just return the first result, but this could be looped if I wanted to iterate through all results.  Could also add ternary operators for blank fields, and add "degrees, farenheit/etc." to the end of responses.
         var weather = {
             "date": response.list[0].dt_txt,
             "city name": response.city.name,
@@ -54,20 +55,22 @@ prompt.get(['city', 'state'], function (err, result) {
         var validRecommendations = [];
         var dontWearList = [];
 
-        // For each recommendation, if the forecasted weather falls between the minimum and maximum temp
+        // For each recommendation, 
         for(var i=0; i<=recommendations.available_recommendations.length-1; i++) {   
+            // if the forecasted weather falls between the minimum and maximum temp,
             if((weather.temp >= recommendations.available_recommendations[i].min_temp) && (weather.temp <= recommendations.available_recommendations[i].max_temp)) {
-                // And the forecast is rain or snow
+                // And the forecast is rain or snow,
                 if(weather.weather == 'Rain' || weather.weather == 'Snow') {
-                    //waterproof check
+                    //Check if recommendation is waterproof.
                     if(recommendations.available_recommendations[i].waterproof == 'true') {
                         //Add the recommended item name to the validRecommendations array.
                         validRecommendations.push(recommendations.available_recommendations[i].name);
                     }
-                    // if it's not rain or snow, no need for waterproof check
+                    // If the forecast is not rain or snow, no need for waterproof check.
                 } else {
                     validRecommendations.push(recommendations.available_recommendations[i].name);
                 }
+                //**More scenarios and conditions can be added.
             } 
             else {
                 // Otherwise, add the item name to the dontWearList
@@ -78,6 +81,11 @@ prompt.get(['city', 'state'], function (err, result) {
         // If the validRecommendations array is empty, return a message.
         if(validRecommendations.length == 0) {
             validRecommendations.push('You need new attire.');
+        }
+
+        // If the dontWearList array is empty, return a message.
+        if(dontWearList.length == 0) {
+            dontWearList.push('Wear everything.');
         }
 
         //Output for recommended attire
