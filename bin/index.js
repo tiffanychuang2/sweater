@@ -32,7 +32,7 @@ prompt.get(['city', 'state'], function (err, result) {
     if(request.readyState == 4) {
         var response = JSON.parse(request.responseText);
         
-        // Build response body - opted to just return the first result, but this could be put in a loop if I wanted to iterate through all results.
+        // Build response body - opted to hardcode '0' to just return the first result, but this could be looped if I wanted to iterate through all results.
         var weather = {
             "date": response.list[0].dt_txt,
             "city name": response.city.name,
@@ -57,18 +57,25 @@ prompt.get(['city', 'state'], function (err, result) {
         // For each recommendation, if the forecasted weather falls between the minimum and maximum temp
         for(var i=0; i<=recommendations.available_recommendations.length-1; i++) {   
             if((weather.temp >= recommendations.available_recommendations[i].min_temp) && (weather.temp <= recommendations.available_recommendations[i].max_temp)) {
-                // And the forecast is rain or snow and the clothing item is waterproof 
-                if((weather.weather == 'Rain' || weather.weather == 'Snow') && recommendations.available_recommendations[i].waterproof == 'true') {
-                    //Add the recommended item name to the validRecommendations array.
+                // And the forecast is rain or snow
+                if(weather.weather == 'Rain' || weather.weather == 'Snow') {
+                    //waterproof check
+                    if(recommendations.available_recommendations[i].waterproof == 'true') {
+                        //Add the recommended item name to the validRecommendations array.
+                        validRecommendations.push(recommendations.available_recommendations[i].name);
+                    }
+                    // if it's not rain or snow, no need for waterproof check
+                } else {
                     validRecommendations.push(recommendations.available_recommendations[i].name);
                 }
-            } else {
+            } 
+            else {
                 // Otherwise, add the item name to the dontWearList
                 dontWearList.push(recommendations.available_recommendations[i].name);
             }
         }
 
-        //If the validRecommendations array is empty, return a message.
+        // If the validRecommendations array is empty, return a message.
         if(validRecommendations.length == 0) {
             validRecommendations.push('You need new attire.');
         }
