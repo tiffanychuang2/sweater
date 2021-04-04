@@ -12,7 +12,7 @@ To support that, we’ll try to make this subsystem fairly data driven.
 
 ### Usage
 
-Run node in project directoroy
+Run node in project directory
 
 ```node .```
 
