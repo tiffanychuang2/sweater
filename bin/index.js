@@ -62,10 +62,13 @@ prompt.get(['city', 'state'], function (err, result) {
                 // And the forecast is rain or snow,
                 if(weather.weather == 'Rain' || weather.weather == 'Snow') {
                     //Check if recommendation is waterproof.
-                    if(recommendations.available_recommendations[i].waterproof == 'true') {
+                    if (recommendations.available_recommendations[i].waterproof == 'false') {
+                        //Add the recommended item name to the dontWearList
+                        dontWearList.push(recommendations.available_recommendations[i].name);
+                    } else if(recommendations.available_recommendations[i].waterproof == 'true') {
                         //Add the recommended item name to the validRecommendations array.
                         validRecommendations.push(recommendations.available_recommendations[i].name);
-                    }
+                    } 
                     // If the forecast is not rain or snow, no need for waterproof check.
                 } else {
                     validRecommendations.push(recommendations.available_recommendations[i].name);
